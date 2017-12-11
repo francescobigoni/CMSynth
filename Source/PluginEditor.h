@@ -42,8 +42,8 @@ private:
 	Label fmLabel;
 	Slider amSlider;
 	Label amLabel;
-	Slider NSlider;
-	Label NLabel;
+	Slider nStagesSlider;
+	Label nStagesLabel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CmsynthAudioProcessorEditor)
 };

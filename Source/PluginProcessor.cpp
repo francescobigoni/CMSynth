@@ -20,7 +20,7 @@ CmsynthAudioProcessor::CmsynthAudioProcessor()
                       #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  AudioChannelSet::mono(), true)
                       #endif
-                       .withOutput ("Output", AudioChannelSet::mono(), true)
+                       .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
                        )
 #endif
@@ -99,11 +99,11 @@ void CmsynthAudioProcessor::prepareToPlay (double sampleRate, int)
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
 	fm.reset(sampleRate, 1e-2);
-	fm.setValue((float)100.0);
+	fm.setValue(100.0f);
 	am.reset(sampleRate, 1e-2);
-	am.setValue((float)0.1);
+	am.setValue(0.1f);
 	nStages.reset(sampleRate, 1e-2);
-	nStages.setValue((float)1.0);
+	nStages.setValue(1.0f);
 	phaseM = 0.0;
 	in = 0.0;
 	out = 0.0;
@@ -159,8 +159,6 @@ void CmsynthAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer&
     // audio processing...
 	const float* carrier = buffer.getReadPointer(0);
 
-	float* channelData = buffer.getWritePointer(0);
-
 	float modulator;
 
 	for (int i = 0; i < buffer.getNumSamples(); i++)
@@ -176,8 +174,11 @@ void CmsynthAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer&
 			delayBufferOut[j] = out;
 			in = out;
 		}
-
-		channelData[i] = out;
+		
+		for (int channel = 0; channel < buffer.getNumChannels(); channel++) {
+			float* channelData = buffer.getWritePointer(channel);
+			channelData[i] = out;
+		}
 		phaseM += deltaPhaseM;
 	}
 

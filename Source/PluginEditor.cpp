@@ -39,28 +39,28 @@ CmsynthAudioProcessorEditor::CmsynthAudioProcessorEditor (CmsynthAudioProcessor&
 	amLabel.setJustificationType(Justification::centred);
 	amLabel.attachToComponent(&amSlider, false);
 
-	NSlider.setSliderStyle(Slider::Rotary);
-	NSlider.setRange(1.0, 1000.0, 1.0);
-	NSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 150, NSlider.getTextBoxHeight());
-	NSlider.setValue(1.0);
-	NSlider.setVelocityBasedMode(true);
-	NSlider.setVelocityModeParameters(10.0, 50, 0.0, false);
-	NLabel.setText("Number of stages", dontSendNotification);
-	NLabel.setJustificationType(Justification::centred);
-	NLabel.attachToComponent(&NSlider, false);
+	nStagesSlider.setSliderStyle(Slider::Rotary);
+	nStagesSlider.setRange(1.0, 1000.0, 1.0);
+	nStagesSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 150, nStagesSlider.getTextBoxHeight());
+	nStagesSlider.setValue(1.0);
+	nStagesSlider.setVelocityBasedMode(true);
+	nStagesSlider.setVelocityModeParameters(10.0, 50, 0.0, false);
+	nStagesLabel.setText("Number of stages", dontSendNotification);
+	nStagesLabel.setJustificationType(Justification::centred);
+	nStagesLabel.attachToComponent(&nStagesSlider, false);
 
 	// Display sliders and labels
 	addAndMakeVisible(&fmSlider);
 	addAndMakeVisible(&fmLabel);
 	addAndMakeVisible(&amSlider);
 	addAndMakeVisible(&amLabel);
-	addAndMakeVisible(&NSlider);
-	addAndMakeVisible(&NLabel);
+	addAndMakeVisible(&nStagesSlider);
+	addAndMakeVisible(&nStagesLabel);
 
 	// Add listeners to sliders
 	fmSlider.addListener(this);
 	amSlider.addListener(this);
-	NSlider.addListener(this);
+	nStagesSlider.addListener(this);
 }
 
 CmsynthAudioProcessorEditor::~CmsynthAudioProcessorEditor()
@@ -81,9 +81,21 @@ void CmsynthAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
-	fmSlider.setBounds(20, 100, 200, 200);
-	amSlider.setBounds(250, 100, 200, 200);
-	NSlider.setBounds(480, 100, 200, 200);
+	int marginX = 20;
+	int marginY = 30;
+	int x = marginX;
+	int y = marginY;
+	int size = 150;
+
+	fmSlider.setBounds(x, y, size, size);
+	x += fmSlider.getWidth() + marginX;
+	amSlider.setBounds(x, y, size, size);
+	x += amSlider.getWidth() + marginX;
+	nStagesSlider.setBounds(x, y, size, size);
+
+	int numX = 3;
+	int numY = 1;
+	setSize(size * numX + marginX * (numX + 1), size * numY + marginY * (numY + 1));
 }
 
 void CmsynthAudioProcessorEditor::sliderValueChanged(Slider* slider)
@@ -96,6 +108,6 @@ void CmsynthAudioProcessorEditor::sliderValueChanged(Slider* slider)
 
 void CmsynthAudioProcessorEditor::sliderDragEnded(Slider * slider)
 {
-	if (slider == &NSlider)
-		processor.nStages.setValue((float)NSlider.getValue());
+	if (slider == &nStagesSlider)
+		processor.nStages.setValue((float)nStagesSlider.getValue());
 }

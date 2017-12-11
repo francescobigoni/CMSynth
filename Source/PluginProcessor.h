@@ -56,6 +56,11 @@ public:
 	void getStateInformation(MemoryBlock& destData) override;
 	void setStateInformation(const void* data, int sizeInBytes) override;
 
+	LinearSmoothedValue<float> fm;
+	LinearSmoothedValue<float> am;
+	LinearSmoothedValue<float> nStages;
+
+private:
 	void updateDeltaPhase();
 
 	float in;
@@ -64,12 +69,7 @@ public:
 	float delayBufferOut[1000] = {};
 	float phaseM;
 	float deltaPhaseM;
-	
-	LinearSmoothedValue<float> fm;
-	LinearSmoothedValue<float> am;
-	LinearSmoothedValue<float> nStages;
 
-private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CmsynthAudioProcessor)
 };
