@@ -58,7 +58,7 @@ public:
 
 	LinearSmoothedValue<float> fm;
 	LinearSmoothedValue<float> am;
-	LinearSmoothedValue<float> nStages;
+	int nStages;
 
 private:
 	void updateDeltaPhase();

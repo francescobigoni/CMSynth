@@ -102,8 +102,7 @@ void CmsynthAudioProcessor::prepareToPlay (double sampleRate, int)
 	fm.setValue(100.0f);
 	am.reset(sampleRate, 1e-2);
 	am.setValue(0.1f);
-	nStages.reset(sampleRate, 1e-2);
-	nStages.setValue(1.0f);
+	nStages = 1;
 	phaseM = 0.0;
 	in = 0.0;
 	out = 0.0;
@@ -166,8 +165,8 @@ void CmsynthAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer&
 		updateDeltaPhase();
 		modulator = am.getNextValue() * std::sin(phaseM);
 		in = carrier[i];
-
-		for (int j = 0; j < std::floor(nStages.getNextValue()); j++)
+		
+		for (int j = 0; j < nStages; j++)
 		{
 			out = delayBufferIn[j] + modulator * (in - delayBufferOut[j]);
 			delayBufferIn[j] = in;

@@ -109,5 +109,5 @@ void CmsynthAudioProcessorEditor::sliderValueChanged(Slider* slider)
 void CmsynthAudioProcessorEditor::sliderDragEnded(Slider * slider)
 {
 	if (slider == &nStagesSlider)
-		processor.nStages.setValue((float)nStagesSlider.getValue());
+		processor.nStages = (int)nStagesSlider.getValue();
 }
