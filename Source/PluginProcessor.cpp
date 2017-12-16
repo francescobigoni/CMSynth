@@ -102,10 +102,11 @@ void CmsynthAudioProcessor::prepareToPlay (double sampleRate, int)
 	fm.setValue(100.0f);
 	am.reset(sampleRate, 1e-2);
 	am.setValue(0.1f);
-	nStages = 1;
+	nStages.reset(sampleRate, 1e-1);
+	nStages.setValue(1.0f);
 	phaseM = 0.0;
 	in = 0.0;
-	out = 0.0;
+	//out = 0.0;
 	updateDeltaPhase();
 }
 
@@ -166,18 +167,44 @@ void CmsynthAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer&
 		modulator = am.getNextValue() * std::sin(phaseM);
 		in = carrier[i];
 		
-		for (int j = 0; j < nStages; j++)
+		float currentNStages = nStages.getNextValue();
+		int currentNStagesInt = (int)std::floor(currentNStages);
+		float currentNStagesFrac = currentNStages - currentNStagesInt;
+
+		for (int j = 0; j < currentNStagesInt; j++)
 		{
-			out = delayBufferIn[j] + modulator * (in - delayBufferOut[j]);
+			out[j] = delayBufferIn[j] + modulator * (in - delayBufferOut[j]);
 			delayBufferIn[j] = in;
-			delayBufferOut[j] = out;
-			in = out;
+			delayBufferOut[j] = out[j];
+			in = out[j];
 		}
 		
-		for (int channel = 0; channel < buffer.getNumChannels(); channel++) {
-			float* channelData = buffer.getWritePointer(channel);
-			channelData[i] = out;
+		if (currentNStagesFrac != 0)
+		{
+			int j = currentNStagesInt;
+			out[j] = delayBufferIn[j] + modulator * (in - delayBufferOut[j]);
+			delayBufferIn[j] = in;
+			delayBufferOut[j] = out[j];
+
+			out[j] = (1 - currentNStagesFrac) * delayBufferIn[j - 1] + currentNStagesFrac *  delayBufferIn[j]
+				+ modulator * (in - ((1 - currentNStagesFrac) * delayBufferOut[j - 1] + currentNStagesFrac * delayBufferOut[j]));
+			
+			for (int channel = 0; channel < buffer.getNumChannels(); channel++)
+			{
+				float* channelData = buffer.getWritePointer(channel);
+				channelData[i] = out[j];
+			}
 		}
+
+		else
+		{
+			for (int channel = 0; channel < buffer.getNumChannels(); channel++)
+			{
+				float* channelData = buffer.getWritePointer(channel);
+				channelData[i] = out[currentNStagesInt - 1];
+			}
+		}
+		
 		phaseM += deltaPhaseM;
 	}
 

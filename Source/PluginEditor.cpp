@@ -40,7 +40,7 @@ CmsynthAudioProcessorEditor::CmsynthAudioProcessorEditor (CmsynthAudioProcessor&
 	amLabel.attachToComponent(&amSlider, false);
 
 	nStagesSlider.setSliderStyle(Slider::Rotary);
-	nStagesSlider.setRange(1.0, 1000.0, 1.0);
+	nStagesSlider.setRange(1.0, 1000.0);
 	nStagesSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 150, nStagesSlider.getTextBoxHeight());
 	nStagesSlider.setValue(1.0);
 	nStagesSlider.setVelocityBasedMode(true);
@@ -104,10 +104,6 @@ void CmsynthAudioProcessorEditor::sliderValueChanged(Slider* slider)
 		processor.fm.setValue((float)fmSlider.getValue());
 	else if (slider == &amSlider)
 		processor.am.setValue((float)amSlider.getValue());
-}
-
-void CmsynthAudioProcessorEditor::sliderDragEnded(Slider * slider)
-{
-	if (slider == &nStagesSlider)
-		processor.nStages = (int)nStagesSlider.getValue();
+	else if (slider == &nStagesSlider)
+		processor.nStages.setValue((float)nStagesSlider.getValue());
 }

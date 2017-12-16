@@ -34,7 +34,6 @@ private:
     CmsynthAudioProcessor& processor;
 
 	void sliderValueChanged(Slider* slider) override;
-	void sliderDragEnded(Slider * slider) override;
 
 	// Create sliders and labels for parameters
 

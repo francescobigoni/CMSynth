@@ -58,13 +58,13 @@ public:
 
 	LinearSmoothedValue<float> fm;
 	LinearSmoothedValue<float> am;
-	int nStages;
+	LinearSmoothedValue<float> nStages;
 
 private:
 	void updateDeltaPhase();
 
 	float in;
-	float out;
+	float out[1000] = {};
 	float delayBufferIn[1000] = {};
 	float delayBufferOut[1000] = {};
 	float phaseM;
