@@ -15,7 +15,7 @@ Parameters::Parameters(AudioProcessor &processor) : valueTree(processor, nullptr
 	valueTree.createAndAddParameter("fm",
 		"Modulation frequency",
 		"Hz",
-		NormalisableRange<float>(0, 10.0e3),
+		NormalisableRange<float>(0.0, 10.0e3, 0.0, 0.199),
 		100.0,
 		nullptr,
 		nullptr);

@@ -19,6 +19,7 @@ CmsynthAudioProcessorEditor::CmsynthAudioProcessorEditor (CmsynthAudioProcessor&
 	fmAttachment = new SliderAttachment(valueTreeState, "fm", fmSlider);
 	amAttachment = new SliderAttachment(valueTreeState, "am", amSlider);
 	nStagesAttachment = new SliderAttachment(valueTreeState, "nStages", nStagesSlider);
+
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 	setSize(730, 400);
@@ -28,8 +29,6 @@ CmsynthAudioProcessorEditor::CmsynthAudioProcessorEditor (CmsynthAudioProcessor&
 	fmSlider.setRange(0.0, 10.0e3);
 	fmSlider.setTextValueSuffix(" Hz");
 	fmSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 150, fmSlider.getTextBoxHeight());
-	fmSlider.setSkewFactorFromMidPoint(316.0);
-	fmSlider.setValue(100.0);
 	fmLabel.setText("Modulation frequency", dontSendNotification);
 	fmLabel.setJustificationType(Justification::centred);
 	fmLabel.attachToComponent(&fmSlider, false);
@@ -37,7 +36,6 @@ CmsynthAudioProcessorEditor::CmsynthAudioProcessorEditor (CmsynthAudioProcessor&
 	amSlider.setSliderStyle(Slider::Rotary);
 	amSlider.setRange(0.0, 0.99);
 	amSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 150, amSlider.getTextBoxHeight());
-	amSlider.setValue(0.1);
 	amLabel.setText("Modulation index", dontSendNotification);
 	amLabel.setJustificationType(Justification::centred);
 	amLabel.attachToComponent(&amSlider, false);
@@ -45,7 +43,6 @@ CmsynthAudioProcessorEditor::CmsynthAudioProcessorEditor (CmsynthAudioProcessor&
 	nStagesSlider.setSliderStyle(Slider::Rotary);
 	nStagesSlider.setRange(1.0, 1000.0);
 	nStagesSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 150, nStagesSlider.getTextBoxHeight());
-	nStagesSlider.setValue(1.0);
 	nStagesSlider.setVelocityBasedMode(true);
 	nStagesSlider.setVelocityModeParameters(10.0, 50, 0.0, false);
 	nStagesLabel.setText("Number of stages", dontSendNotification);
