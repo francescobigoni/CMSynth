@@ -11,6 +11,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "Parameters.h"
 
 
 //==============================================================================
@@ -56,11 +57,8 @@ public:
 	void getStateInformation(MemoryBlock& destData) override;
 	void setStateInformation(const void* data, int sizeInBytes) override;
 
-	LinearSmoothedValue<float> fm;
-	LinearSmoothedValue<float> am;
-	LinearSmoothedValue<float> nStages;
-
 private:
+	Parameters parameters;
 	void updateDeltaPhase();
 
 	float in;

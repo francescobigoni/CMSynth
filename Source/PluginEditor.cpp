@@ -13,9 +13,12 @@
 
 
 //==============================================================================
-CmsynthAudioProcessorEditor::CmsynthAudioProcessorEditor (CmsynthAudioProcessor& p)
-    : AudioProcessorEditor (&p), processor (p)
+CmsynthAudioProcessorEditor::CmsynthAudioProcessorEditor (CmsynthAudioProcessor& p, Parameters& params)
+    : AudioProcessorEditor (&p), processor (p), valueTreeState(params.valueTree)
 {
+	fmAttachment = new SliderAttachment(valueTreeState, "fm", fmSlider);
+	amAttachment = new SliderAttachment(valueTreeState, "am", amSlider);
+	nStagesAttachment = new SliderAttachment(valueTreeState, "nStages", nStagesSlider);
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 	setSize(730, 400);
@@ -56,11 +59,6 @@ CmsynthAudioProcessorEditor::CmsynthAudioProcessorEditor (CmsynthAudioProcessor&
 	addAndMakeVisible(&amLabel);
 	addAndMakeVisible(&nStagesSlider);
 	addAndMakeVisible(&nStagesLabel);
-
-	// Add listeners to sliders
-	fmSlider.addListener(this);
-	amSlider.addListener(this);
-	nStagesSlider.addListener(this);
 }
 
 CmsynthAudioProcessorEditor::~CmsynthAudioProcessorEditor()
@@ -96,14 +94,4 @@ void CmsynthAudioProcessorEditor::resized()
 	int numX = 3;
 	int numY = 1;
 	setSize(size * numX + marginX * (numX + 1), size * numY + marginY * (numY + 1));
-}
-
-void CmsynthAudioProcessorEditor::sliderValueChanged(Slider* slider)
-{
-	if (slider == &fmSlider)
-		processor.fm.setValue((float)fmSlider.getValue());
-	else if (slider == &amSlider)
-		processor.am.setValue((float)amSlider.getValue());
-	else if (slider == &nStagesSlider)
-		processor.nStages.setValue((float)nStagesSlider.getValue());
 }

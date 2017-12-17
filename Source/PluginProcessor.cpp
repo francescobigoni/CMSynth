@@ -22,8 +22,11 @@ CmsynthAudioProcessor::CmsynthAudioProcessor()
                       #endif
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
+#elif
+	:
 #endif
+parameters(*this)
 {
 }
 
@@ -98,15 +101,11 @@ void CmsynthAudioProcessor::prepareToPlay (double sampleRate, int)
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-	fm.reset(sampleRate, 1e-2);
-	fm.setValue(100.0f);
-	am.reset(sampleRate, 1e-2);
-	am.setValue(0.1f);
-	nStages.reset(sampleRate, 1e-1);
-	nStages.setValue(1.0f);
+	parameters.fm.reset(sampleRate, 0.01);
+	parameters.am.reset(sampleRate, 0.01);
+	parameters.nStages.reset(sampleRate, 0.01);
 	phaseM = 0.0;
 	in = 0.0;
-	//out = 0.0;
 	updateDeltaPhase();
 }
 
@@ -163,11 +162,12 @@ void CmsynthAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer&
 
 	for (int i = 0; i < buffer.getNumSamples(); i++)
 	{
+		parameters.update();
 		updateDeltaPhase();
-		modulator = am.getNextValue() * std::sin(phaseM);
+		modulator = parameters.am.getNextValue() * std::sin(phaseM);
 		in = carrier[i];
 		
-		float currentNStages = nStages.getNextValue();
+		float currentNStages = parameters.nStages.getNextValue();
 		int currentNStagesInt = (int)std::floor(currentNStages);
 		float currentNStagesFrac = currentNStages - currentNStagesInt;
 
@@ -213,7 +213,7 @@ void CmsynthAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer&
 
 void CmsynthAudioProcessor::updateDeltaPhase()
 {
-	deltaPhaseM = 2 * float_Pi * (float)fm.getNextValue() / (float)getSampleRate();
+	deltaPhaseM = 2 * float_Pi * (float)parameters.fm.getNextValue() / (float)getSampleRate();
 }
 
 //==============================================================================
@@ -224,7 +224,7 @@ bool CmsynthAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* CmsynthAudioProcessor::createEditor()
 {
-    return new CmsynthAudioProcessorEditor (*this);
+    return new CmsynthAudioProcessorEditor (*this, parameters);
 }
 
 //==============================================================================

@@ -12,16 +12,17 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
+#include "Parameters.h"
 
+typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 
 //==============================================================================
 /**
 */
-class CmsynthAudioProcessorEditor  : public AudioProcessorEditor,
-									 private Slider::Listener
+class CmsynthAudioProcessorEditor  : public AudioProcessorEditor
 {
 public:
-    CmsynthAudioProcessorEditor (CmsynthAudioProcessor&);
+    CmsynthAudioProcessorEditor (CmsynthAudioProcessor&, Parameters&);
     ~CmsynthAudioProcessorEditor();
 
     //==============================================================================
@@ -32,8 +33,11 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     CmsynthAudioProcessor& processor;
+	AudioProcessorValueTreeState& valueTreeState;
 
-	void sliderValueChanged(Slider* slider) override;
+	ScopedPointer<SliderAttachment> fmAttachment;
+	ScopedPointer<SliderAttachment> amAttachment;
+	ScopedPointer<SliderAttachment> nStagesAttachment;
 
 	// Create sliders and labels for parameters
 
