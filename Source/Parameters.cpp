@@ -10,18 +10,6 @@
 
 #include "Parameters.h"
 
-/*
-==============================================================================
-
-Parameters.cpp
-Created: 28 Nov 2017 12:31:49pm
-Author:  Pelle Juul Christensen
-
-==============================================================================
-*/
-
-#include "Parameters.h"
-
 Parameters::Parameters(AudioProcessor &processor) : valueTree(processor, nullptr)
 {
 	valueTree.createAndAddParameter("fm",
@@ -49,9 +37,6 @@ Parameters::Parameters(AudioProcessor &processor) : valueTree(processor, nullptr
 		nullptr);
 
 	float sampleRate = processor.getSampleRate();
-	fm.reset(sampleRate, 0.01);
-	am.reset(sampleRate, 0.01);
-	nStages.reset(sampleRate, 0.1);
 }
 
 void Parameters::update()
