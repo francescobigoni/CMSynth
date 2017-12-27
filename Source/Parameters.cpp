@@ -21,7 +21,7 @@ Parameters::Parameters(AudioProcessor &processor) : valueTree(processor, nullptr
 		nullptr);
 
 	valueTree.createAndAddParameter("am",
-		"Modulation amplitude",
+		"Modulation index",
 		"",
 		NormalisableRange<float>(0.0, 0.99),
 		0.1,
@@ -35,8 +35,6 @@ Parameters::Parameters(AudioProcessor &processor) : valueTree(processor, nullptr
 		1.0,
 		nullptr,
 		nullptr);
-
-	float sampleRate = processor.getSampleRate();
 }
 
 void Parameters::update()
