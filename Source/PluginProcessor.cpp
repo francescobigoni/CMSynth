@@ -208,8 +208,7 @@ void CmsynthAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer&
 		phaseM += deltaPhaseM;
 	}
 
-	if (phaseM > 2 * double_Pi)
-		phaseM -= 2 * double_Pi;
+	phaseM = (float)std::fmod(phaseM, 2 * float_Pi);
 }
 
 void CmsynthAudioProcessor::updateDeltaPhase()
