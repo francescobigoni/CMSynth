@@ -105,7 +105,6 @@ void CmsynthAudioProcessor::prepareToPlay (double sampleRate, int)
 	parameters.am.reset(sampleRate, 0.01);
 	parameters.nStages.reset(sampleRate, 0.01);
 	phaseM = 0.0;
-	in = 0.0;
 	updateDeltaPhase();
 }
 
@@ -162,6 +161,7 @@ void CmsynthAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer&
 
 	for (int i = 0; i < buffer.getNumSamples(); i++)
 	{
+		float in;
 		parameters.update();
 		updateDeltaPhase();
 		modulator = parameters.am.getNextValue() * std::sin(phaseM);

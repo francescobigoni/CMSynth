@@ -61,7 +61,6 @@ private:
 	Parameters parameters;
 	void updateDeltaPhase();
 
-	float in;
 	float out[1000] = {};
 	float delayBufferIn[1000] = {};
 	float delayBufferOut[1000] = {};
