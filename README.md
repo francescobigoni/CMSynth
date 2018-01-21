@@ -4,7 +4,7 @@ Sound synthesis using an allpass filter chain with coefficient modulation
 JUCE audio plugin implemented after Kleimola et al., <i>Sound Synthesis Using an Allpass Filter Chain with Audio-Rate Coefficient Modulation</i>,
 Proc. of the 12th Int. Conference on Digital Audio Effects (DAFx-09), Como, Italy, September 1-4, 2009.
 
-By using linear interpolation, a fractional number of stages is allowed to avoid phase discontinuities when altering the chain length in real time. 
+By using linear interpolation, a fractional number of stages is allowed. This is to avoid phase discontinuities when altering the chain length in real time. 
 
 ## Parameters
 - Modulation frequency: frequency of the modulating sine wave
