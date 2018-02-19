@@ -9,6 +9,7 @@
 */
 
 #pragma once
+
 #include "../JuceLibraryCode/JuceHeader.h"
 
 struct Parameters
@@ -21,4 +22,6 @@ struct Parameters
 	LinearSmoothedValue<float> nStages;
 
 	AudioProcessorValueTreeState valueTree;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Parameters)
 };
