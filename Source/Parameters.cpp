@@ -2,7 +2,7 @@
   ==============================================================================
 
     Parameters.cpp
-    Created: 17 Dec 2017 1:22:01pm
+    Created: 21 Aug 2019 7:47:07pm
     Author:  franc
 
   ==============================================================================
@@ -10,36 +10,30 @@
 
 #include "Parameters.h"
 
-Parameters::Parameters(AudioProcessor &processor) : valueTree(processor, nullptr)
-{
-	valueTree.createAndAddParameter("fm",
-		"Modulation frequency",
-		"Hz",
-		NormalisableRange<float>(0.0, 10.0e3, 0.0, 0.199),
-		100.0,
-		nullptr,
-		nullptr);
+Parameters::Parameters(AudioProcessor& processor) : valueTree(processor, nullptr, "Parameters",
+	{
+		std::make_unique<AudioParameterFloat>("fm",
+		"Modulation Frequency",
+		NormalisableRange<float>(0.0, 100.0, 0.001, 0.199),
+		1.0),
 
-	valueTree.createAndAddParameter("am",
-		"Modulation index",
-		"",
+		std::make_unique<AudioParameterFloat>("am",
+		"Modulation Index",
 		NormalisableRange<float>(0.0, 0.99),
-		0.1,
-		nullptr,
-		nullptr);
+		0.1),
 
-	valueTree.createAndAddParameter("nStages",
-		"Number of stages",
-		"",
-		NormalisableRange<float>(1.0, 1000.0),
-		1.0,
-		nullptr,
-		nullptr);
+		std::make_unique<AudioParameterFloat>("nStages",
+		"Number of Stages",
+		NormalisableRange<float>(1.0, 200.0, 0, 0.5),
+		1.0)
+	})
+{
+
 }
 
 void Parameters::update()
 {
-	fm.setValue(*valueTree.getRawParameterValue("fm"));
-	am.setValue(*valueTree.getRawParameterValue("am"));
-	nStages.setValue(*valueTree.getRawParameterValue("nStages"));
+	fm.setTargetValue(*valueTree.getRawParameterValue("fm"));
+	am.setTargetValue(*valueTree.getRawParameterValue("am"));
+	nStages.setTargetValue(*valueTree.getRawParameterValue("nStages"));
 }

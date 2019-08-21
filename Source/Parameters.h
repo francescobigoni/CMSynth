@@ -2,19 +2,19 @@
   ==============================================================================
 
     Parameters.h
-    Created: 17 Dec 2017 1:22:07pm
+    Created: 21 Aug 2019 7:47:07pm
     Author:  franc
 
   ==============================================================================
 */
 
 #pragma once
-
 #include "../JuceLibraryCode/JuceHeader.h"
 
 struct Parameters
 {
-	Parameters(AudioProcessor &processor);
+	Parameters(AudioProcessor& processor);
+
 	void update();
 
 	LinearSmoothedValue<float> fm;
@@ -22,6 +22,4 @@ struct Parameters
 	LinearSmoothedValue<float> nStages;
 
 	AudioProcessorValueTreeState valueTree;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Parameters)
 };

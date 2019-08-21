@@ -15,7 +15,6 @@
 #include "Parameters.h"
 
 typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
-
 //==============================================================================
 /**
 */
@@ -35,9 +34,9 @@ private:
     CmsynthAudioProcessor& processor;
 	AudioProcessorValueTreeState& valueTreeState;
 
-	ScopedPointer<SliderAttachment> fmAttachment;
-	ScopedPointer<SliderAttachment> amAttachment;
-	ScopedPointer<SliderAttachment> nStagesAttachment;
+	std::unique_ptr<SliderAttachment> fmAttachment;
+	std::unique_ptr<SliderAttachment> amAttachment;
+	std::unique_ptr<SliderAttachment> nStagesAttachment;
 
 	// Create sliders and labels for parameters
 

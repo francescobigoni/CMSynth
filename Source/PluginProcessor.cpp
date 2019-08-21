@@ -11,23 +11,22 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-
 //==============================================================================
 CmsynthAudioProcessor::CmsynthAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  AudioChannelSet::mono(), true)
+                       .withInput  ("Input",  AudioChannelSet::stereo(), true)
                       #endif
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
-                       ),
-#elif
-	:
+                       )
 #endif
-parameters(*this)
+	, parameters(*this)
 {
+	currentPhaseM = 0.0;
+	deltaPhaseM = 0.0;
 }
 
 CmsynthAudioProcessor::~CmsynthAudioProcessor()
@@ -83,29 +82,28 @@ int CmsynthAudioProcessor::getCurrentProgram()
     return 0;
 }
 
-void CmsynthAudioProcessor::setCurrentProgram (int)
+void CmsynthAudioProcessor::setCurrentProgram (int index)
 {
 }
 
-const String CmsynthAudioProcessor::getProgramName (int)
+const String CmsynthAudioProcessor::getProgramName (int index)
 {
     return {};
 }
 
-void CmsynthAudioProcessor::changeProgramName (int, const String&)
+void CmsynthAudioProcessor::changeProgramName (int index, const String& newName)
 {
 }
 
 //==============================================================================
-void CmsynthAudioProcessor::prepareToPlay (double sampleRate, int)
+void CmsynthAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
 	parameters.fm.reset(sampleRate, 0.01);
 	parameters.am.reset(sampleRate, 0.01);
 	parameters.nStages.reset(sampleRate, 0.01);
-	phaseM = 0.0;
-	updateDeltaPhase();
+	updateDeltaPhase(parameters.fm.getNextValue(), sampleRate);
 }
 
 void CmsynthAudioProcessor::releaseResources()
@@ -138,11 +136,11 @@ bool CmsynthAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) 
 }
 #endif
 
-void CmsynthAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer&)
+void CmsynthAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
     ScopedNoDenormals noDenormals;
-    const int totalNumInputChannels  = getTotalNumInputChannels();
-    const int totalNumOutputChannels = getTotalNumOutputChannels();
+    auto totalNumInputChannels  = getTotalNumInputChannels();
+    auto totalNumOutputChannels = getTotalNumOutputChannels();
 
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
@@ -150,70 +148,69 @@ void CmsynthAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer&
     // This is here to avoid people getting screaming feedback
     // when they first compile a plugin, but obviously you don't need to keep
     // this code if your algorithm always overwrites all the output channels.
-    for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
-	const float* carrier = buffer.getReadPointer(0);
+    // Make sure to reset the state if your inner loop is processing
+    // the samples and the outer loop is handling the channels.
+    // Alternatively, you can process the samples with the channels
+    // interleaved by keeping the same state.
 
-	float modulator;
-
-	for (int i = 0; i < buffer.getNumSamples(); i++)
+	for (int n = 0; n < buffer.getNumSamples(); n++)
 	{
 		float in;
+		float modulator;
+
 		parameters.update();
-		updateDeltaPhase();
-		modulator = parameters.am.getNextValue() * std::sin(phaseM);
-		in = carrier[i];
+		updateDeltaPhase(parameters.fm.getNextValue(), getSampleRate());
+		modulator = parameters.am.getNextValue() * std::sin(currentPhaseM);
+		currentPhaseM += deltaPhaseM;
 		
 		float currentNStages = parameters.nStages.getNextValue();
-		int currentNStagesInt = (int)std::floor(currentNStages);
+		long currentNStagesInt = (long)(currentNStages);
 		float currentNStagesFrac = currentNStages - currentNStagesInt;
 
-		for (int j = 0; j < currentNStagesInt; j++)
+		for (int channel = 0; channel < totalNumInputChannels; ++channel)
 		{
-			out[j] = delayBufferIn[j] + modulator * (in - delayBufferOut[j]);
-			delayBufferIn[j] = in;
-			delayBufferOut[j] = out[j];
-			in = out[j];
-		}
-		
-		if (currentNStagesFrac != 0)
-		{
-			int j = currentNStagesInt;
-			out[j] = delayBufferIn[j] + modulator * (in - delayBufferOut[j]);
-			delayBufferIn[j] = in;
-			delayBufferOut[j] = out[j];
-
-			out[j] = (1 - currentNStagesFrac) * delayBufferIn[j - 1] + currentNStagesFrac *  delayBufferIn[j]
-				+ modulator * (in - ((1 - currentNStagesFrac) * delayBufferOut[j - 1] + currentNStagesFrac * delayBufferOut[j]));
+			auto* carrier = buffer.getReadPointer(channel);
+			auto* channelData = buffer.getWritePointer(channel);
+			in = carrier[n];
 			
-			for (int channel = 0; channel < buffer.getNumChannels(); channel++)
+			for (long j = 0; j < currentNStagesInt; j++)
 			{
-				float* channelData = buffer.getWritePointer(channel);
-				channelData[i] = out[j];
+				out[channel][j] = delayBufferIn[channel][j] + modulator * (in - delayBufferOut[channel][j]);
+				delayBufferIn[channel][j] = in;
+				delayBufferOut[channel][j] = out[channel][j];
+				in = out[channel][j];
 			}
-		}
 
-		else
-		{
-			for (int channel = 0; channel < buffer.getNumChannels(); channel++)
+			if (currentNStagesFrac != 0)
 			{
-				float* channelData = buffer.getWritePointer(channel);
-				channelData[i] = out[currentNStagesInt - 1];
+				long j = currentNStagesInt;
+				out[channel][j] = delayBufferIn[channel][j] + modulator * (in - delayBufferOut[channel][j]);
+				delayBufferIn[channel][j] = in;
+				delayBufferOut[channel][j] = out[channel][j];
+
+				out[channel][j] = (1 - currentNStagesFrac) * delayBufferIn[channel][j - 1] + currentNStagesFrac * delayBufferIn[channel][j]
+					+ modulator * (in - ((1 - currentNStagesFrac) * delayBufferOut[channel][j - 1] + currentNStagesFrac * delayBufferOut[channel][j]));
+
+				channelData[n] = out[channel][j];
 			}
+
+			else
+				channelData[n] = out[channel][currentNStagesInt - 1];
 		}
-		
-		phaseM += deltaPhaseM;
 	}
 
-	phaseM = (float)std::fmod(phaseM, 2 * float_Pi);
+	if (currentPhaseM > MathConstants<double>::twoPi)
+		currentPhaseM -= MathConstants<double>::twoPi;
 }
 
-void CmsynthAudioProcessor::updateDeltaPhase()
+void CmsynthAudioProcessor::updateDeltaPhase(float newFrequency, double sampleRate)
 {
-	deltaPhaseM = 2 * float_Pi * (float)parameters.fm.getNextValue() / (float)getSampleRate();
+	deltaPhaseM = MathConstants<double>::twoPi * (double)newFrequency / sampleRate;
 }
 
 //==============================================================================
@@ -228,14 +225,14 @@ AudioProcessorEditor* CmsynthAudioProcessor::createEditor()
 }
 
 //==============================================================================
-void CmsynthAudioProcessor::getStateInformation (MemoryBlock&)
+void CmsynthAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
 }
 
-void CmsynthAudioProcessor::setStateInformation (const void*, int)
+void CmsynthAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
